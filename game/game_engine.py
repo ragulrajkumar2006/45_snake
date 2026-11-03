@@ -21,15 +21,19 @@ class GameEngine:
 
         self.score = 0
         self.font = pygame.font.SysFont("Arial", 30)
+        self.game_over_title_font = pygame.font.SysFont("Arial", 56)
+        self.game_over_score_font = pygame.font.SysFont("Arial", 38)
+        self.game_over_prompt_font = pygame.font.SysFont("Arial", 22)
 
         self.moves_per_second = 8
         self._frame_counter = 0
 
         self.game_over = False
-        self._game_over_logged = False
 
     def handle_keydown(self, key):
-        # Direction changes are applied immediately on key press.
+        if self.game_over:
+            return
+
         if key in (pygame.K_UP, pygame.K_w):
             self.snake.set_direction(0, -1)
         elif key in (pygame.K_DOWN, pygame.K_s):
@@ -81,7 +85,19 @@ class GameEngine:
         score_text = self.font.render(f"Score: {self.score}", True, WHITE)
         screen.blit(score_text, (10, 10))
 
-        if self.game_over and not self._game_over_logged:
-            # NOTE: no proper game-over screen yet - see Task 2 in the README.
-            print("Game over! Final score:", self.score)
-            self._game_over_logged = True
+        if self.game_over:
+            overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
+            screen.blit(overlay, (0, 0))
+
+            title = self.game_over_title_font.render("GAME OVER", True, WHITE)
+            final_score = self.game_over_score_font.render(
+                f"Final Score: {self.score}", True, WHITE
+            )
+            prompt = self.game_over_prompt_font.render(
+                "Close the window to exit", True, WHITE
+            )
+
+            screen.blit(title, title.get_rect(center=(self.width // 2, self.height // 2 - 60)))
+            screen.blit(final_score, final_score.get_rect(center=(self.width // 2, self.height // 2)))
+            screen.blit(prompt, prompt.get_rect(center=(self.width // 2, self.height // 2 + 55)))
